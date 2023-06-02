@@ -121,14 +121,16 @@ delete;
 
 普通LRU带来的问题
 
-1. 预读失效：加载数据页时，会将邻近的数据页一起加载中Buffer Pool中，这些数据页会被加载在LRU链表的头部，实际不一定能用到，反而可能会频繁将用到的数据页淘汰，导致缓存命中率降低；InnoDB中将LRU分成了yong区，和old区；
+1. 预读失效：加载数据页时，会将邻近的数据页一起加载中Buffer Pool中，这些数据页会被加载在LRU链表的头部，实际不一定能用到，反而可能会频繁将用到的数据页淘汰，导致缓**存命中率降低**；InnoDB中将LRU分成了yong区，和old区；
 2. Buffer Pool污染：当某一个 SQL 语句**扫描了大量的数据**时，在 Buffer Pool 空间比较有限的情况下，可能会将 **Buffer Pool 里的所有页都替换出去，导致大量热数据被淘汰了**，等这些热数据又被再次访问的时候，由于缓存未命中，就会产生大量的磁盘 IO，MySQL 性能就会急剧下降，这个过程被称为 **Buffer Pool 污染**。
 
 **脏页刷盘的时机**
 
 1. checkpoint检查点（比如redo log日志满时主动触发脏页刷盘），InnoDB会周期性地生成一个检查点。检查点之前的脏页都需要写回磁盘，以确保数据的持久性。
 2. LRU，当Buffer Pool需要更多空间时，将会淘汰最近最少使用的数据页。在淘汰过程中，如果被选中的是个脏页，会先被写回磁盘并从Buffer Pool中移除；
-3. 后台线程刷新，InnoDB有一个后台刷新线程，负责定期将脏页异步刷新到磁盘。
+3. 后台线程刷新，InnoDB有一个后台刷盘线程，负责定期将脏页异步刷新到磁盘。
+
+
 
 ### 索引
 
@@ -136,12 +138,31 @@ delete;
 
 **慢查询日志**
 
-**bin log**
+#### **bin log**
 
-**redo log**
+​	bin log 是由MySQL Server层实现的,bin log 是用来保证MySQL主从复制的日志，以二进制形式追加的全量文件（写满了重新新建一个文件开始写）。对比 redo log 和 undo log 是由innoDB层面实现的；bin log记录日志有三种格式，分别为 `row`,`statement`,`mixed`;
 
-**undo log**
+- statement: 记录的是sql语句原文；（问题:例如遇到 字段 = now()这种就会出现问题，导致主从的数据不一致；从而需要row格式）
 
-**错误日志**
+- row: 记录的是操作的具体数据，但是会占用更多的存储空间。
+- mixed: 混合模式，会造成数据不一致的使用row，否则就是用statement格式；
+
+#### **redo log**
+
+​	重做日志，为了保证数据的一致性，InnoDB使用了 redo log 拥有了 `crash-safe`崩溃恢复的能力（这里指的是脏页在还没有落盘的时候MySQL服务挂了，磁盘的数据就没有被修改掉。有了redo log 文件组之后，mysql再次启动的时候，会将log文件写入数据，这时数据就和崩溃恢复前的脏页数据一致了）。
+
+​	**redo log 的刷盘时机：**当修改数据时，如果Buffer Pool中存在包含该数据的页，会先修改数据页变成脏页，再写入redo log文件中，再刷盘，这个技术称为`WAL`write-ahead write：MySQL的写操作并不是立刻写到磁盘上，而是先写入到日志，然后在合适的时间写入到磁盘中（见刷盘策略） 。redo log 按照一定的策略进行刷盘。先记日志，再进行刷盘，有什么好处？1. 将`随机io`（磁盘修改数据）变成`顺序io`（redo log记录）; 2. `减少磁盘io`，可以将redo log批量的记录刷入到磁盘中，而不是每次都刷盘； 3. `提供事务的持久性和恢复能力`；
+
+​	**redo log 的刷盘策略：**在InnoDB中并不是每次修改数据时，写入 redo log 文件，为了提高性能，而是写入在 `redo log buffer` （默认值为16M）中，由==innodb_flush_log_at_trx_commit==参数决定刷盘策略；有以下三个参数决定刷盘策略：[摘自官网](https://dev.mysql.com/doc/refman/5.7/en/innodb-parameters.html#sysvar_innodb_flush_log_at_trx_commit)
+
+- 0: Logs are written and flushed to disk once per second. Transactions for which logs have not been flushed can be lost in a crash.
+- 1: Logs are written and flushed to disk at each transaction commit.完全符合ACID的要求；
+- 2: Logs are written after each transaction commit and flushed to disk `once per second`. Transactions for which logs have not been flushed can be lost in a crash.
+
+#### **undo log**
+
+​	回滚日志，为了保证事务的原子性。在开启一个事务前，
+
+#### **错误日志**
 
 ### 锁

@@ -109,7 +109,7 @@ delete;
 
 **Buffer Pool**
 
-​	缓存池 Buffer Pool 用于在内存中缓存表数据和索引数据（从磁盘读取的**数据页**缓存在内存中->**缓存页**），以提高读取和写入性能；其大小可以通过`innndb_buffer_pool_size`设置；缓存池使用LRU(Least Recnetly Used)算法来管理数据页的使用；
+缓存池 Buffer Pool 用于在内存中缓存表数据和索引数据（从磁盘读取的**数据页**缓存在内存中->**缓存页**），以提高读取和写入性能；其大小可以通过`innndb_buffer_pool_size`设置；缓存池使用LRU(Least Recnetly Used)算法来管理数据页的使用；
 
 ​	当需要从磁盘中读取数据页时，InnoDB会首先检查数据页是否在缓存池中，如果在，直接返回给查询操作，否则则将从磁盘读取几个数据页到缓存池中。如果Buffer Pool空间不够，则采用LRU算法淘汰一些缓存页；
 
@@ -146,7 +146,7 @@ delete;
 
 ​	bin log 是由MySQL Server层实现的,bin log 是用来保证MySQL主从复制的日志，以二进制形式追加的全量文件（写满了重新新建一个文件开始写）。对比 redo log 和 undo log 是由innoDB层面实现的；bin log记录日志有三种格式，分别为 `row`,`statement`,`mixed`;
 
-- statement: 记录的是sql语句原文；（问题:例如遇到 字段 = now()这种就会出现问题，导致主从的数据不一致；从而需要row格式）
+- statement: 记录的是sql语句原文；（问题:例如遇到 字段 = now()这种就会出现问题，导致主从的数据不一致；从而需要row格式）。
 
 - row: 记录的是操作的具体数据，但是会占用更多的存储空间。
 - mixed: 混合模式，会造成数据不一致的使用row，否则就是用statement格式；
@@ -155,9 +155,15 @@ delete;
 
 ​	重做日志，为了保证数据的一致性，InnoDB使用了 redo log 拥有了 `crash-safe`崩溃恢复的能力（这里指的是脏页在还没有落盘的时候MySQL服务挂了，磁盘的数据就没有被修改掉。有了redo log 文件组之后，mysql再次启动的时候，会将log文件写入数据，这时数据就和崩溃恢复前的脏页数据一致了）。
 
-​	**redo log 的刷盘时机：**当修改数据时，如果Buffer Pool中存在包含该数据的页，会先修改数据页变成脏页，再写入redo log文件中，再刷盘，这个技术称为`WAL`write-ahead write：MySQL的写操作并不是立刻写到磁盘上，而是先写入到日志，然后在合适的时间写入到磁盘中（见刷盘策略） 。redo log 按照一定的策略进行刷盘。先记日志，再进行刷盘，有什么好处？1. 将`随机io`（磁盘修改数据）变成`顺序io`（redo log记录）; 2. `减少磁盘io`，可以将redo log批量的记录刷入到磁盘中，而不是每次都刷盘； 3. `提供事务的持久性和恢复能力`；
+​	**redo log 的刷盘流程：**当修改数据时，如果Buffer Pool中存在包含该数据的页，会先修改数据页变成脏页，再写入redo log文件中，再刷盘，这个技术称为`WAL`write-ahead write：MySQL的写操作并不是立刻写到磁盘上，而是先写入到日志，然后在合适的时间写入到磁盘中（见刷盘策略） 。redo log 按照一定的策略进行刷盘。先记日志，再进行刷盘，有什么好处？1. 将`随机io`（磁盘修改数据）变成`顺序io`（redo log记录）; 2. `减少磁盘io`，可以将redo log批量的记录刷入到磁盘中，而不是每次都刷盘； 3. `提供事务的持久性和恢复能力`；
 
-​	**redo log 的刷盘策略：**在InnoDB中并不是每次修改数据时，写入 redo log 文件，为了提高性能，而是写入在 `redo log buffer` （默认值为16M）中，由==innodb_flush_log_at_trx_commit==参数决定刷盘策略；有以下三个参数决定刷盘策略：[摘自官网](https://dev.mysql.com/doc/refman/5.7/en/innodb-parameters.html#sysvar_innodb_flush_log_at_trx_commit)
+**redo log 的刷盘策略：**在InnoDB中并不是在每次修改的数据时写入 redo log 文件，为了提高性能，而是写入在 `redo log buffer` （默认值为16M）中。redo log buffer 缓存中的log写入redo log文件时，会有以下几个时机：
+
+- redo log buffer**空间不足一半时**，会触发刷盘；
+- InnoDB的**后台线程每隔1秒**，将redo log buffer持久化到磁盘；
+- **每次事务提交时**都将缓存在redo log buffer的redo log直接持久化到磁盘（此策略由innodb_flush_log_at_trx_commit控制）
+
+`innodb_flush_log_at_trx_commit`参数决定刷盘策略；有以下三个参数决定刷盘策略：[摘自官网](https://dev.mysql.com/doc/refman/5.7/en/innodb-parameters.html#sysvar_innodb_flush_log_at_trx_commit)
 
 - 0: Logs are written and flushed to disk once per second. Transactions for which logs have not been flushed can be lost in a crash.
 - 1: Logs are written and flushed to disk at each transaction commit.完全符合ACID的要求；
@@ -165,7 +171,7 @@ delete;
 
 #### **undo log**
 
-​	回滚日志，为了保证事务的原子性。在开启一个事务前，
+​	`回滚日志`，主要用于事务的回滚和配合mvcc解决幻读的问题，undo log 保证了事务的原子性。在事务提交之前，undo log 会记录对数据修改的操作，例如delete语句，undo log 则记录为insert语句，这样在需要回滚时，就能进行数据还原。
 
 #### **错误日志**
 

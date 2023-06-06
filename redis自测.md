@@ -31,6 +31,30 @@
 
 ### redis持久化
 
+​	redis是基于内存的，与memecached不同的是，redis提供了两种持久化数据的方式，分别为**`AOF`**和**`RDB`**以及在redis6后新出的**`mixed`**，包含AOF和RDB;
+
+#### AOF append-only file
+
+​	AOF持久化是通过保存redis服务器所执行的`写命令`来记录数据库状态的，由appendonly yes/no控制。并且aof追加写由三个参数控制。当aof文件越写越大时，redis提供了aof`重写机制`，当aof文件的大小超过了设定的阈值后，就会启用aof重写机制，来压缩aof文件。AOF 重写机制是在重写时，读取当前数据库中的所有键值对，然后将每一个键值对用一条命令记录到「新的 AOF 文件」，等到全部记录完后，就将新的 AOF 文件替换掉现有的 AOF 文件（重写aof文件也是由子线程完成的，不阻塞主线程）。
+
+```xml
+appendfsync everysec 	//默认 每秒将aof_buf缓冲区同步到aof文件中，丢失1秒数据的风险
+appendfsync no				//不主动将aof_buf同步到aof文件，交由操作系统决定何时异步的将aof_buf同步到aof文件。也会增加数据丢失的风险
+appendfsync always		//在每个redis写入命令后会强制将aof_buf写入aof文件
+```
+
+#### RDB snapshot
+
+​	redis将内存中的`快照`通过二进制的形式写入到磁盘文件已到达数据持久化。提供了两个命令来创建rdb文件，`save`和`bgsave`，save 会**阻塞**主线程的操作,直到rdb文件创建完毕。bgsave 是主线程fork一个子线程，通过子线程来创建rdb文件，主线程将继续处理请求命令。
+
+​	在redis配置文件中，提供了三种配置来实现每隔一段时间，自动执行bgsave。
+
+```xml
+save 900 1  	//900秒内，至少进行了一次修改，执行bgsave
+save 300 10 	//300秒内，至少进行了10次修改，执行bgsave
+save 60 10000 //60秒内，至少进行了10000次修改，执行bgsave
+```
+
 ### redis集群
 
 ### redis应用

@@ -1,4 +1,8 @@
-### redis基础
+### redis内存篇
+
+#### **键的过期删除策略和内存淘汰机制**
+
+
 
 ### redis线程模型
 
@@ -33,14 +37,16 @@
 
 ​	redis是基于内存的，与memecached不同的是，redis提供了两种持久化数据的方式，分别为**`AOF`**和**`RDB`**以及在redis6后新出的**`mixed`**，包含AOF和RDB;
 
+​	redis启动redis时，会优先加载aof文件，因为aof里面的文件更完整，如果aof文件不存在，则会去找rdb文件，从rdb文件恢复数据来启动，如果没有rdb文件，则直接启动；
+
 #### AOF append-only file
 
-​	AOF持久化是通过保存redis服务器所执行的`写命令`来记录数据库状态的，由appendonly yes/no控制。并且aof追加写由三个参数控制。当aof文件越写越大时，redis提供了aof`重写机制`，当aof文件的大小超过了设定的阈值后，就会启用aof重写机制，来压缩aof文件。AOF 重写机制是在重写时，读取当前数据库中的所有键值对，然后将每一个键值对用一条命令记录到「新的 AOF 文件」，等到全部记录完后，就将新的 AOF 文件替换掉现有的 AOF 文件（重写aof文件也是由子线程完成的，不阻塞主线程）。
+​	AOF持久化是通过保存redis服务器所执行的`写命令`来记录数据库状态的，由参数appendonly yes/no控制。并且aof追加写由三个参数控制。当aof文件越写越大时，redis提供了aof`重写机制`，当aof文件的大小超过了设定的阈值后，就会启用aof重写机制，来压缩aof文件。AOF 重写机制是在重写时，读取当前数据库中的所有键值对，然后将每一个键值对用一条命令记录到「新的 AOF 文件」，等到全部记录完后，就将新的 AOF 文件替换掉现有的 AOF 文件（重写aof文件也是由子线程完成的，不阻塞主线程）。
 
 ```xml
 appendfsync everysec 	//默认 每秒将aof_buf缓冲区同步到aof文件中，丢失1秒数据的风险
 appendfsync no				//不主动将aof_buf同步到aof文件，交由操作系统决定何时异步的将aof_buf同步到aof文件。也会增加数据丢失的风险
-appendfsync always		//在每个redis写入命令后会强制将aof_buf写入aof文件
+appendfsync always		//在每个redis写入命令后会强制将aof_buf写入aof文件，每个写命令都需要写回硬盘，磁盘io开销大
 ```
 
 #### RDB snapshot
@@ -55,9 +61,59 @@ save 300 10 	//300秒内，至少进行了10次修改，执行bgsave
 save 60 10000 //60秒内，至少进行了10000次修改，执行bgsave
 ```
 
-### redis集群
+#### aof和rdb的一些对比
+
+1. redis加载rdb文件恢复数据速度要远快于aof文件；但数据完整度不如aof，aof支持秒级的持久化；
+2. rdb文件是二进制的，没有可读性；aof是普通的文本文件；
+3. rdb的文件大小要小于aof文件，虽然两者都有一些压缩机制，如rdb会有压缩算法，aof会有bgrewriteaof机制；
+
+### redis高可用
+
+#### 主从复制
+
+> 单机redis存在单点风险。为保证redis的高可用，最简单的方式就是使用`主从复制`扩展redis，主节点 master 主要负责写请求， 从节点 slave 主要负责读请求和来自 master 的请求（redis 是自带读写分离的，可以通过参数`save-read-only yes` 控制slave只读）。`主从复制`就是将一台主节点的数据复制到其他的redis从节点中。尽最大可能保证**主从的数据一致**。**Redis Sentinel 和 Reids Cluster 都依赖于主从复制。**
+>
+> 通过在从节点配置文件钟加入参数 slaveof/replicaof master'ip port 实现；
+
+**主从复制同步方式：**
+
+- 全量同步：比如第一次同步时，master通过bgsave生成rdb文件，slave接收传输过来`rdb文件`进行同步。
+- 增量同步：正常的主从复制过程中，主节点将写的命令发给从节点，从节点执行相同的命令。增量同步是基于`复制缓冲区（Replication buffer）`
+
+#### Redis Sentinel
+
+> redis Sentinel是redis自带的高可用解决方案。它通过监控主节点和自动故障转移来实现高可用。当主节点发生故障时，sentinel会自动选举一个新的主节点进行切换。
+
+**Sentinel作用：**
+
+- **集群监控**：监控所有redis节点（包括sentinel节点自身的状态是否正常）==通过心跳机制检测==。
+- **故障转移**：如果一个master出现故障，Sentinel会帮助我们实现故障转移，自动将某一个slave升级为master，确保整个redis的可用性。
+- **消息通知**：通知slave新的master连接信息，让他们执行replicaof/slaveof成为新的master的slave;
+- **配置中心**：如果故障转移发生了，通知客户端新的master地址。
+
+**Redis Sentinel中有两个下线概念：**
+
+​	**主观下线：**sentinel节点认为某个redis节点已经下线（心跳检测机制）。
+
+​	**客观下线：**超过半数的sentinel节点认为某个redis节点已经下线。
+
+一旦sentinel发现master故障，sentinel需要在salve中选择一个作为新的maset，选举依据：
+
+- slave节点与master节点的断开时间长短；
+- slave节点的slave-priority优先级，越小优先级越高；
+- 最近一次的offset，越大优先级越高；
+
+#### Redis Cluster
+
+
 
 ### redis应用
+
+#### 缓存穿透
+
+#### 缓存击穿
+
+#### 缓存雪崩
 
 ### redis数据结构及实现概括
 

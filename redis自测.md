@@ -2,6 +2,48 @@
 
 #### **键的过期删除策略和内存淘汰机制**
 
+> 在对redis进行数据写时，通常会给key通过`expire`（单位秒）或`pexpire`（单位毫秒）设置一个生存时间`TTL`，在经过指定时间后，*<u>服务器会有相应的机制来删除这个键</u>*, 就得提到redis过期键的删除策略了；
+
+结合redis6中的源码，在 server.h 中 `redisDb`结构体表示着一个redis数据库，`*dict`数据库键空间，保存着数据库中所有键值对。`*expires`过期键字典，键是一个指针，指向键空间中的某个键，过期时间为value;
+
+如何判定一个键是否过期？
+
+1. 检查给定键是否存在于过期字典：如果存在，那么取得键的过期时间；
+2. 检查当前时间戳是否大于键的过期时间：如果是的话则表明键过期了；
+
+```c++
+typedef struct redisServer {
+  	//...
+		redisDb *db; 				/* 一个数组指针，保存服务器中的所有数据库（0-15）像select 1 切换到数据库1就是切换数据库 */
+  	//...
+}redisServer；
+
+typedef struct redisDb {
+    dict *dict;                 /* The keyspace for this DB */
+    dict *expires;              /* Timeout of keys with a timeout set */
+    dict *blocking_keys;        /* Keys with clients waiting for data (BLPOP)*/
+    dict *ready_keys;           /* Blocked keys that received a PUSH */
+    dict *watched_keys;         /* WATCHED keys for MULTI/EXEC CAS */
+    int id;                     /* Database ID */
+    long long avg_ttl;          /* Average TTL, just for stats */
+    unsigned long expires_cursor; /* Cursor of the active expire cycle. */
+    list *defrag_later;         /* List of key names to attempt to defrag one by one, gradually. */
+} redisDb;
+```
+
+而对于过期的键，redis是需要删除过期键以节约空间，有如下的过期键删除策略（redis采用的是**定期删除+惰性删除**）：
+
+- `惰性删除`: 访问一个过期键时，检查该键是否过期，过期删除；（cpu友好，内存空间不友好）
+- `定期删除`: 每隔一段时间，随机检查一些过期键并删除；（cpu不友好，内存空间友好）
+
+虽然提供了对过期键提供了删除策略，但还是有很大可能存在两者策略都漏掉的过期key情况，导致内存空间越来越少，当内存不足时，redis会触发淘汰机制来淘汰这些键，以释放内存空间；列举一些常见的：
+
+- `LRU(least recently used)`：最近最少使用（分为淘汰 <u>所有键</u>和<u>过期键</u>）；
+- `LFU(least frequently used)`: 最不经常使用（分为淘汰 <u>所有键</u>和<u>过期键</u>）；
+- `ttl`: 先淘汰更早过期的键值；
+- `random`： 随机淘汰（分为淘汰 <u>所有键</u>和<u>过期键</u>；
+
+-------
 
 
 ### redis线程模型
@@ -105,15 +147,34 @@ save 60 10000 //60秒内，至少进行了10000次修改，执行bgsave
 
 #### Redis Cluster
 
+> 在主从部署模式上，虽然实现了一定程度的高并发，并保证了高可用，但有如下限制：
+>
+> - slave数据和master数据一摸一样，master的数据量就是集群的瓶颈限制；
+> - redis集群的写能力也受到了master节点的单机限制；
+
+在高版本的redis已经原生支持`集群cluster`模式，可以多master 多 slave部署，横向扩展Redis集群的能力。
+
+
+
+//todo ...................未完
+
 
 
 ### redis应用
 
-#### 缓存穿透
+#### key设计
 
-#### 缓存击穿
 
-#### 缓存雪崩
+
+#### 缓存
+
+##### 缓存穿透
+
+##### 缓存击穿
+
+##### 缓存雪崩
+
+##### 双写一致性问题
 
 ### redis数据结构及实现概括
 

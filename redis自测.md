@@ -269,3 +269,69 @@ Sorted Set类型的底层数据结构是由`压缩列表或跳表`实现的；�
 
 ### redis数据结构
 
+#### Dict 哈希表
+
+> redis的键值关系的映射是通过底层数据结构Dict来实现的。Dict由三部分组成：`哈希表dictht`、`哈希节点dictEntry`、`字典Dict`;	
+
+```c
+typedef struct dict {
+    // dcit类型，内置不同的hash函数
+    dictType *type;
+    // 私有数据，在做特殊hash运算时用
+    void *privatedata;
+    // 一个dict包含包含两个哈希表，一个是当前数据，另一个一般为空，rehash时使用
+    dictht ht[2]；
+    //rehash的进度，-1 表示未经性
+    long rehashidx;    
+    //rehash是否暂停，1则暂停，0则继续
+    int16_t pauserrehash；
+}dict
+```
+
+```c
+typedef struct dictht {
+    //哈希表数组
+    dictEntry **table;
+    //哈希表大小,2^n
+    unsigned long size;  
+    //哈希表大小掩码，用于计算索引值,sizemask = size - 1，哈希值 & sizemask得到的就是索引值
+    unsigned long sizemask;
+    //该哈希表已有的节点数量
+    unsigned long used;
+} dictht;
+```
+
+```c
+typedef struct dictEntry {
+    //键值对中的键
+    void *key;
+    //联合体，键值对中的值，value为以下任一一个数据类型
+    union {
+        void *val;
+        uint64_t u64;
+        int64_t s64;
+        double d;
+    } v;
+    //指向下一个哈希表节点，形成链表
+    struct dictEntry *next;
+} dictEntry;
+```
+| ![image-20230611163538626](F:\self_testing_note\assets\image-20230611163538626.png) |
+| ------------------------------------------------------------ |
+
+**Dict的扩容**
+
+> Dict中的HashTable就是数组结合单向链表的实现，当集中元素较多时，必会导致哈希冲突过多，链表过长，则查询效率会大大降低；
+
+Dict在每次新增键值对时都会检查**负载因子（LoadFactor = used/size）**, 满足以下两种情况时会触发哈希表扩容：
+
+- 哈希表的LoadFactor>=1，并且服务器没有执行**bgsave**或**bgReWriteAof**等后台进程；
+- 哈希表的LoadFactor>5;
+
+**Dict的收缩**
+
+Dict每次删除元素时，也会对负载因子做检查，当**LoadFactory<0.1**时，会做哈小标收缩；
+
+**Dict的rehash**
+
+> 不管是扩容还是收缩，必定会创建新的哈希表，导致哈希表的size和sizemask发生变化，从而影响key值的查询。因此必须对哈希表中的每一个key重新计算索引，放入新的哈希表，正是dictht ht[2]。这个过程称为**rehash再哈希/渐进式哈希**;

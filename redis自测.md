@@ -1,4 +1,32 @@
-[TOC]
+- [redis内存篇](#redis内存篇)
+  - [键的过期删除策略和内存淘汰机制](#键的过期删除策略和内存淘汰机制)
+- [redis线程模型](#redis线程模型)
+  - [网络编程模型](#网络编程模型)
+  - [select、poll、epoll简述](#selectpollepoll简述)
+- [redis持久化](#redis持久化)
+  - [AOF append-only file](#aof-append-only-file)
+  - [RDB snapshot](#rdb-snapshot)
+  - [aof和rdb的一些对比](#aof和rdb的一些对比)
+- [redis高可用](#redis高可用)
+  - [主从复制](#主从复制)
+  - [Redis Sentinel](#redis-sentinel)
+  - [Redis Cluster](#redis-cluster)
+- [redis应用](#redis应用)
+  - [key设计](#key设计)
+  - [缓存更新策略](#缓存更新策略)
+  - [并发带来的常见缓存问题](#并发带来的常见缓存问题)
+    - [缓存穿透](#缓存穿透)
+    - [缓存击穿](#缓存击穿)
+    - [缓存雪崩](#缓存雪崩)
+- [redis数据类型及实现概括](#redis数据类型及实现概括)
+  - [1. String](#1-string)
+  - [2. List](#2-list)
+  - [3. Hash](#3-hash)
+  - [4. Set 集合](#4-set-集合)
+  - [5. Sorted Sort 有序集合](#5-sorted-sort-有序集合)
+- [redis数据结构](#redis数据结构)
+  - [Dict 哈希表](#dict-哈希表)
+  - [ZipList](#ziplist)
 ### redis内存篇
 
 #### 键的过期删除策略和内存淘汰机制
@@ -316,8 +344,8 @@ typedef struct dictEntry {
     struct dictEntry *next;
 } dictEntry;
 ```
-| ![image-20230611163538626](assets\image-20230611163538626.png) |
-| ------------------------------------------------------------ |
+| ![](./redis自测.assets/image-20230611163538626.png) |
+| --------------------------------------------------- |
 
 **Dict的扩容**
 

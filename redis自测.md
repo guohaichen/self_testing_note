@@ -316,7 +316,7 @@ typedef struct dictEntry {
     struct dictEntry *next;
 } dictEntry;
 ```
-| ![image-20230611163538626](F:\self_testing_note\assets\image-20230611163538626.png) |
+| ![image-20230611163538626](assets\image-20230611163538626.png) |
 | ------------------------------------------------------------ |
 
 **Dict的扩容**
@@ -334,4 +334,14 @@ Dict每次删除元素时，也会对负载因子做检查，当**LoadFactory<0.
 
 **Dict的rehash**
 
-> 不管是扩容还是收缩，必定会创建新的哈希表，导致哈希表的size和sizemask发生变化，从而影响key值的查询。因此必须对哈希表中的每一个key重新计算索引，放入新的哈希表，正是dictht ht[2]。这个过程称为**rehash再哈希/渐进式哈希**;
+> 不管是扩容还是收缩，必定会创建新的哈希表，导致哈希表的size和sizemask发生变化，从而影响key值的查询。因此必须对哈希表中的每一个key重新计算索引，放入新的哈希表，正是dictht ht[2]。这个过程称为**rehash再哈希/渐进式哈希**;在rehash过程中，新增操作，则直接写入ht[1]，查询、修改和删除则会在ht[0]和ht[1]一次查找并执行，这样可以确保ht[0]的数据只增不减，随着rehash最终ht[0]为空。
+
+#### ZipList
+
+> ZipList压缩链表是redis为了节约内存而开发的，它是由连续内存块组成的顺序型数据结构。
+>
+> 一个ZipList记录了 `zlbytes`总字节数、`zltail`尾偏移量、`zllen`entry节点个数、`entry`head节点、`entry`元素、`zlend`压缩链表的尾端;
+>
+> 列表的节点之间不是通过next指针链接，而是记录上一节点和本节点长度来寻址，内存占用较低；
+
+//todo more

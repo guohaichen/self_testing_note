@@ -101,16 +101,34 @@
 
 #### SpringBoot
 
-##### 什么是Spring Boot？它与传统的Spring框架有何不同？
+##### 什么是SpringBoot？它与传统的Spring框架有何不同？
 
-##### Spring Boot的核心特点是什么？为什么使用Spring Boot？
+##### Spring Boot的核心特点是什么？为什么使用SpringBoot？
 
-##### 如何创建一个Spring Boot应用程序？需要哪些配置和依赖？
+##### 如何创建一个SpringBoot应用程序？需要哪些配置和依赖？
 
-##### Spring Boot的自动配置是如何工作的？如何自定义和禁用自动配置？
+##### 介绍@SpringBootApplication注解
 
-##### 什么是Spring Boot Starter？如何使用和创建自定义的Starter？
+> @SpringBootApplication是一个合成注解，包含`@Configuration`、`@EnableAutoConfiguration`、`@ComponentScan`；作用分别是
+>
+> @Configuration: 允许在上下文中注册额外的bean或导入其他配置类；
+>
+> @EnableAutoConfiguration: 启用SpringBoot自动装配机制；
+>
+> @ComponentScan：扫描该类包所在的包下所有的类；
 
-##### Spring Boot如何处理外部配置和属性文件？
+##### SpringBoot的自动配置是如何工作的？如何自定义和禁用自动配置？
+
+##### 什么是SpringBoot Starter？如何使用和创建自定义的Starter？
+
+##### SpringBoot如何处理外部配置和属性文件？
 
 #### SpringCloud ALIBABA
+
+##### Nacos
+
+##### Gateway
+
+##### Sentinel
+
+##### Seata分布式事务

@@ -127,7 +127,36 @@
 
 ##### Nacos
 
+**nacos的核心功能**
+
+> nacos 全称`Dynamic Naming and Configuration service` 一个更易于构建云原生应用的动态服务发现、配置管理和服务管理平台。
+>
+> 提供了三大功能：
+>
+> - 服务注册与发现：服务提供者将自己的服务实例注册到Nacos中，服务消费者可以通过Nacos获取可用的服务实例列表。
+> - 配置管理：Nacos提供了统一的配置管理功能，可以动态管理和推送配置，配置热更新，支持多种数据格式，如properties，yml等。
+
+Nacos的服务注册面板，其中nacos的服务名为boot程序配置文件中spring.application.name；
+| ![image-20230616141255031](./SpringFramework自测.assets/image-20230616141255031.png) |
+| ------------------------------------------------------------ |
+
+Nacos的配置列表面板，其中`Data Id`为**${prefix服务名}-${spring.profiles.active环境}.${file-extension后缀}**。
+
+| ![image-20230616142257177](./SpringFramework自测.assets/image-20230616142257177.png) |
+| ------------------------------------------------------------ |
+
+Nacos的配置管理流程：
+
+1. 注册配置:配置文件在Nacos中注册；
+2. 服务订阅：服务订阅指定的配置，例如订阅符合Data Id的配置；
+3. 配置拉取：服务定期从Nacos配置中心拉取配置。（通过与配置中心**建立长连接并监听配置**变化实现的。当配置发生变化时，Nacos会**推送通知**给订阅的服务，服务收到通知发起**配置拉取**。）@RefreshScope/@ConfigurationProperties两者都可以实现自动刷配置热更新。
+4. 配置更新：服务更新自身的配置；
+
+**配置文件优先级：**{服务名}-{active环境}.{文件名} > {服务名}.{文件名} > 本地配置；
+
 ##### Gateway
+
+##### OpenFeign
 
 ##### Sentinel
 

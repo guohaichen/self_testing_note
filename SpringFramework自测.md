@@ -178,7 +178,7 @@ Nacos的配置列表面板，其中`Data Id`为**${prefix服务名}-${spring.pro
 
 举例：在没有引入openFeign时，consumer对provider发起调用，使用restTemplate发起http请求：
 
-| ![image-20230616175042894](./SpringFramework自测.assets/image-20230616175042894.png) |
+| ![](./SpringFramework自测.assets/image-20230616175042894.png) |
 | ------------------------------------------------------------ |
 
 而引入了OpenFeign之后，只需要抽取好公共的接口，并引入包，就像调用本地方法一样简单。

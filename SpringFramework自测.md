@@ -36,7 +36,7 @@
 >
 > 5. `销毁`：在应用程序关闭或者手动销毁Bean时，Spring容器会调用Bean的销毁方法。
 >
-> ![img](./SpringFramework自测.assets/07fd8589e54e6d3dbcb371f93448611f.png)
+> <img src="./SpringFramework自测.assets/07fd8589e54e6d3dbcb371f93448611f.png" alt="img" style="zoom: 67%;" />
 
 ##### Bean的作用域
 
@@ -125,6 +125,10 @@
 
 #### SpringCloud ALIBABA
 
+:point_down::point_down::point_down::point_down::point_down::sob:
+
+> 写在前面的话：springcloud的八股目前较少，且我个人接触不到，结合了一些资料和文档，作了一些功能说明和作用，也算熟悉。
+
 ##### Nacos
 
 **nacos的核心功能**
@@ -140,23 +144,51 @@ Nacos的服务注册面板，其中nacos的服务名为boot程序配置文件中
 | ![image-20230616141255031](./SpringFramework自测.assets/image-20230616141255031.png) |
 | ------------------------------------------------------------ |
 
-Nacos的配置列表面板，其中`Data Id`为**${prefix服务名}-${spring.profiles.active环境}.${file-extension后缀}**。
+Nacos的配置列表面板，其中`Data Id`为**${prefix服务名}-${spring.profiles.active环境}.${file-extension后缀}**。根据不同业务场景做好多环节配置隔离Namespace（例如dev，test，prod等），不同业务配置隔离Group。（详见注册表结构）
 
 | ![image-20230616142257177](./SpringFramework自测.assets/image-20230616142257177.png) |
 | ------------------------------------------------------------ |
 
-Nacos的配置管理流程：
+**Nacos的配置热更新流程**：
 
 1. 注册配置:配置文件在Nacos中注册；
 2. 服务订阅：服务订阅指定的配置，例如订阅符合Data Id的配置；
-3. 配置拉取：服务定期从Nacos配置中心拉取配置。（通过与配置中心**建立长连接并监听配置**变化实现的。当配置发生变化时，Nacos会**推送通知**给订阅的服务，服务收到通知发起**配置拉取**。）@RefreshScope/@ConfigurationProperties两者都可以实现自动刷配置热更新。
+3. 配置拉取：服务定期从Nacos配置中心拉取配置。（通过与配置中心**建立长连接并监听配置**变化实现的。当配置发生变化时，Nacos会**推送通知**给订阅的服务，服务收到通知发起**配置拉取**。）@RefreshScope/@ConfigurationProperties两者都可以实现配置热更新。
 4. 配置更新：服务更新自身的配置；
 
 **配置文件优先级：**{服务名}-{active环境}.{文件名} > {服务名}.{文件名} > 本地配置；
 
-##### Gateway
+**Nacos数据模型：**Namespace用来隔离环境，Group用来服务分组。一个Service包含多个实例，各个实例可能处于不用地址位置，因为service下有多个集群Cluster，集群下是不同的实例。
+
+<p><img src="./SpringFramework自测.assets/1561217857314-95ab332c-acfb-40b2-957a-aae26c2b5d71.jpeg" style="zoom: 40%;"><img src="./SpringFramework自测.assets/image-20210925215305446-1686902862990-5.png" alt="image-20210925215305446" style="zoom: 40%;" /></p>
 
 ##### OpenFeign
+
+> OpenFeign是一个声明式的Web服务客户端，用于简化服务间的Http通信。它解决了如下问题：
+>
+> 1. 服务间通信的复杂性：
+> 2. 服务调用的维护成本：
+>
+> OpenFeign的主要功能包括：
+>
+> 1. 声明式的服务调用；
+> 2. 内置ribbon负载均衡；
+> 3. 集成服务发现：
+> 4. 支持请求和响应的拦截：
+
+举例：在没有引入openFeign时，consumer对provider发起调用，使用restTemplate发起http请求：
+
+| ![image-20230616175042894](./SpringFramework自测.assets/image-20230616175042894.png) |
+| ------------------------------------------------------------ |
+
+而引入了OpenFeign之后，只需要抽取好公共的接口，并引入包，就像调用本地方法一样简单。
+
+| <img src="./SpringFramework自测.assets/image-20230616175234677.png" alt="image-20230616175234677" style="zoom:80%;" /> |
+| ------------------------------------------------------------ |
+
+
+
+##### Gateway
 
 ##### Sentinel
 

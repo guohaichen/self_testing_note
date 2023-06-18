@@ -109,25 +109,48 @@
 
 ##### 介绍@SpringBootApplication注解
 
-> @SpringBootApplication是一个合成注解，包含`@Configuration`、`@EnableAutoConfiguration`、`@ComponentScan`；作用分别是
+> @SpringBootApplication是一个组合注解，包含`@SpringBootConfiguration`、`@EnableAutoConfiguration`、`@ComponentScan`；作用分别是
 >
-> @Configuration: 允许在上下文中注册额外的bean或导入其他配置类；
+> - @SpringBootConfiguration: 也是个组合注解，其包含`@Configuration`(允许在上下文中注册额外的bean或导入其他配置类,@SpringBootConfiguration是要求在整个boot程序中只出现一次；
 >
-> @EnableAutoConfiguration: 启用SpringBoot自动装配机制；
+> - @EnableAutoConfiguration: 启用SpringBoot自动装配机制；
 >
-> @ComponentScan：扫描该类包所在的包下所有的类；
+> - @ComponentScan：扫描该类包所在的包下所有的类；
 
 ##### SpringBoot的自动配置是如何工作的？如何自定义和禁用自动配置？
 
+> SpringBoot的自动装配和@SpringBootApplication有很大关系，其包含的`@EnableAutoConfiguration`也是一个组合注解，其包含了`@AutoConfigurationPackage`**用来记住扫描的起始包**和`@Import({AutoConfigurationImportSelector.class})`用来加**载 META-INF/spring.factories 中的自动配置类**。 
+>
+> @Import也可以直接引入自动装配类，而去读了配置文件完成自动装配是因为：
+>
+> 1. 让主配置类和自动配置类解耦合，主配置类不应该直到有哪些从属配置；
+> 2. `AutoConfigurationImportSelector.class` 实现了 DeferredImportSelector 接口，让自动配置的解析晚于主配置的解析；
+>
+> <img src="I:\self_testing_note\assets\image-20230618204857724.png" alt="image-20230618204857724" style="zoom:80%;" />
+>
+> **禁用自动配置**：@ComponentScan中可以使用excludeFilters排除自动配置类；
+>
+> **备注**: @ConditionalOnMissingBean 条件注解，该注解会在Spring容器启动时进行条件判断。如果当前Spring上下文中不存在指定类型的Bean，则会创建该Bean到容器中。如果已经存在，则忽略自动配置。
+
 ##### 什么是SpringBoot Starter？如何使用和创建自定义的Starter？
 
-##### SpringBoot如何处理外部配置和属性文件？
+> SpringBoot Starter是一种用于简化程序配置和依赖管理的方式，它实际包含了一组相关依赖和配置的模块。像在创建boot应用程序时，我们通常会将当前工程的父模块设置为`spring-boot-starter-parent`，而它的父模块又是`spring-boot-dependencies`，在这个starter中，包含了大量自适应版本的自动配置和依赖。
 
 #### SpringCloud ALIBABA
 
 :point_down::point_down::point_down::point_down::point_down::sob:
 
 > 写在前面的话：springcloud的八股和资料目前较少，且我个人接触不到，结合了一些资料和文档，做了一些功能说明和作用，等后面如果有用到再更新。
+>
+> 其实应该看官网：
+>
+> [Nacos](https://nacos.io/zh-cn/docs/v2/quickstart/quick-start.html)
+>
+> [Spring Cloud Gateway](https://docs.spring.io/spring-cloud-gateway/docs/current/reference/html/)
+>
+> [Sentinel](https://sentinelguard.io/zh-cn/docs/introduction.html)
+>
+> [Seata](https://seata.io/zh-cn/docs/overview/what-is-seata.html)
 
 ##### Nacos
 
@@ -192,16 +215,14 @@ Nacos的配置列表面板，其中`Data Id`为**${prefix服务名}-${spring.pro
 - 请求限流（通常借助sentinel实现，gateway中是过滤器实现，配置限流规则，例如每秒允许最大的请求数）
 
 `身份认证和权限校验`通常是交给gateway的过滤器链中实现，例如自定义过滤器实现`GlobalFilter `接口；
-
 | ![image-20230618005901080](I:\self_testing_note\assets\image-20230618005901080.png) |
 | ------------------------------------------------------------ |
 
-`服务路由、负载均衡`举例:（访问网关url地址时，以/user/开头的请求，都转发给user-service，user-service也是注册在nacos的一个服务）
+| `服务路由、负载均衡`举例:（访问网关url地址时，以/user/开头的请求，都转发给user-service，user-service也是注册在nacos的一个服务） |
 
 | ![image-20230618005351848](I:\self_testing_note\assets\image-20230618005351848.png) |
 | ------------------------------------------------------------ |
-
-##### Sentinel
+##### [Sentinel](https://sentinelguard.io/zh-cn/docs/introduction.html)
 
 > 在分布式系统中，各个服务之间依赖关系尤为复杂，如果某服务流量突增，导致服务延迟，响应过慢，随着请求的持续增加，系统可能最后会提供不了服务，如果该服务还和其他服务有依赖关系，那么该问题会慢慢扩散，出现请求堆积、资源占用，慢慢扩散到所有微服务，引起雪崩效应。
 
@@ -213,7 +234,33 @@ Nacos的配置列表面板，其中`Data Id`为**${prefix服务名}-${spring.pro
 4. 隔离：把每个依赖或调用的服务都隔离开，防止级联失败引起的整体服务不可用；
 5. 降级
 
-> Sentinel是由阿里巴巴开元的轻量级的**流量控制和熔断降级框架**，用于保护分布式系统的`稳定性`和`可用性`。它提供了实时的监控、流量控制、**熔断降级**、系统保护等功能。
+> Sentinel是由阿里巴巴开元的轻量级的**流量控制和熔断降级框架**，用于保护分布式系统的`稳定性`和`可用性`。它提供了实时的监控、**流量控制**、**熔断降级**、系统保护等功能。
+
+**流量控制**
+
+**流量阈值**：
+
+- QPS
+
+- 线程数
+
+**流控模式**：
+
+- 直接
+
+- 关联
+
+- 链路
+
+**流控效果**：
+
+- 快速失败
+
+- Warm up
+
+- 排队等待
+
+**熔断降级**：
 
 - `熔断Circuit Breaker`：熔断是一种放置故障扩散的机制，当目标服务出现异常或超过设定的阈值时，熔断器会快速断开该服务的请求，防止继续访问不可用的服务。熔断器通常有三个状态：**关闭状态（允许请求通过）**、**打开状态（拒绝请求）**、**半开状态（部分请求通过）**。
 - `降级Fallback`：服务降级指的是服务器压力剧增的情况下，根据当前业务情况及流量对一些服务和页面有策略的降级(提供备用处理逻辑的机制，例如返回缓存，友好的失败信息等)，以此释放服务器资源以保证核心任务的正常运行。
@@ -222,7 +269,5 @@ Sentinel分为了两个部分：
 
 1. 核心库Java客户端：不依赖任何框架/库，能够运行于所有Java运行时环境。
 2. 控制台Dashboard：基于springboot开发，可直接运行。
-
-
 
 ##### Seata分布式事务

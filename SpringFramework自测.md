@@ -151,6 +151,8 @@
 > [Sentinel](https://sentinelguard.io/zh-cn/docs/introduction.html)
 >
 > [Seata](https://seata.io/zh-cn/docs/overview/what-is-seata.html)
+>
+> [OpenFeign](https://docs.spring.io/spring-cloud-openfeign/docs/current/reference/html/)
 
 ##### Nacos
 

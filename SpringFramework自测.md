@@ -154,7 +154,7 @@
 > 1. 让主配置类和自动配置类解耦合，主配置类不应该直到有哪些从属配置；
 > 2. `AutoConfigurationImportSelector.class` 实现了 DeferredImportSelector 接口，让自动配置的解析晚于主配置的解析；
 >
-> <img src="I:\self_testing_note\assets\image-20230618204857724.png" alt="image-20230618204857724" style="zoom:80%;" />
+> <img src=".\assets\image-20230618204857724.png" alt="image-20230618204857724" style="zoom:80%;" />
 >
 > **禁用自动配置**：@ComponentScan中可以使用excludeFilters排除自动配置类；
 >

@@ -104,7 +104,54 @@ aop的底层实现之一是`代理`，由代理结合通知和目标，提供增
 
 ##### Spring事务管理是如何实现的？介绍Spring事务的传播行为和隔离级别。
 
+- 编程式事务
 
+```java
+@Autowried
+private PaltformTransactionManager transactionManager;
+
+public void transaction(){
+    TransactionStatus status = transactionManager.getTransaction(new DefaultTransactionDefinition());
+    try {
+        // 业务逻辑
+        transactionManager.commit(status);
+    } catch (Exception e) {
+        // 回滚
+        transactionManager.rollback(status);
+    }
+}
+```
+
+- 声明式事务
+
+`@Transaction`:
+
+**事务失效**：
+
+1. **抛出检查异常导致事务不能正确回滚；**
+
+- why：Spring默认只会回滚非检查异常
+- how：配置 rollback 属性 @Transaction(rollbackFor = Exception.class)
+
+2. **业务方法内使用 try-catch 导致事务不能正确回滚**
+
+- why：事务通知只有捕捉到了目标抛出的异常，才能进行后续的回滚处理，如果目标已经在业务层面 try-catch，事务通知无法知悉
+- how：catch 块中 抛出异常；
+- how: catch 块添加 `TransactionInterceptor.currentTransactionStatus().setRollbackOnly();`
+
+3. **aop 切面顺序导致事务不能正常回滚**
+
+- why: 事务切面优先级最低，如果自定义切面和事务优先级一样，则还是自定义切面在内层，如果内层捕获了异常没有正确抛出异常，则事务也会失效；
+- how: 正常抛出，或调整切面顺序；
+
+4. **非public 方法导致事务失效**
+
+- why: Spring 为方法创建代理、添加事务通知，前提条件：该方法是public的；
+
+5. **调用本类方法导致传播行为失效**
+
+- why: 本类方法调用不经过代理，因此无法增强
+- how: 依赖注入自己（成为代理）来调用
 
 #### Spring MVC
 

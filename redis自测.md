@@ -417,4 +417,4 @@ Dict每次删除元素时，也会对负载因子做检查，当**LoadFactory<0.
 
 #### 链表总结：
 
-> Ziplist相比双端链表更节省内存空间，适合存储小型数据；Quicklist在保持较小内存空间的同时，同时做到了存储大量的数据。Skiplist是Sorted Sort的数据结构，提升查找效率。
+> Ziplist相比双端链表更节省内存空间，适合存储小型数据；Quicklist在保持较小内存空间的同时，同时做到了存储大量的数据。Skiplist只在 Sorted Set对象底层使用到了，它支持平均O(logN)复杂的查找。

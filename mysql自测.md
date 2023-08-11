@@ -135,7 +135,7 @@ delete;
 
 **缓存页**分为:
 
-- dirty page: 使用过，并且已经修改过的缓存页;并存在于 Flush、LRU 链表；
+- dirty page: 使用过，并且已经修改过的缓存页;并存在于 FLU、LRU 链表；
 - free page: 未被使用过的空闲缓存页；并存在于 Free 链表；
 - clean page: 被使用过但数据未被修改的缓存页；存在于 LRU 链表；
 

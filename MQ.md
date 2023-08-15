@@ -1,3 +1,68 @@
+### MQ常见协议
+
+#### JMS 
+
+> java messaging service；是java面向消息服务的技术规范，ActiveMQ是该协议的典型实现；
+
+#### AMQP 
+
+>advanced message queuing protocol；一个提供统一消息服务的应用层标准，是应用层协议的一个开放标准。RabbitMQ是它的典型实现；
+
+#### STOMP 
+
+> streaming text orientated message protocol；面向流文本的消息协议 ActiveMQ是它的典型实现；
+
+#### MQTT 7
+
+> message queuing telemetry transport；一种二进制协议，主要用于服务器和低功耗物联网设备间的通信。
+
+### MQ对比
+
+#### Kafka基本概念
+
+- broker 代理: 可以看作是一个独立的kafka服务器，多个kafka broker 组成一个kafka cluster；
+- topic 主题：生产者将消息发送到指定topic，消费者订阅特定topic消费消息；
+- partition 分区：partition属于topic一部分，一个topic可以有多个partition。并且同一topic下的partition可以分布在不同的broker，也就是说一个topic可以横跨多个topic；Kafka通过分区来实现数据冗余和伸缩性。
+
+#### 生产者3个必要的配置
+
+- bootstrap.servers：broker的地址，格式为 host:port 如果为集群，用`，`隔开；
+- key.serializer：key的序列化格式；
+- value.serializer：value的序列化格式；
+
+#### 同步/异步发送消息
+
+```java
+//send方法提供异步和同步两种发送消息模式；
+//同步
+kafkaProducer.send(new ProducerRecord< >("topic", "msg")).get();
+//异步
+kafkaProducer.send(new ProducerRecord<>("topic","msg"), new Callback() {
+  @Override
+  public void onCompletion(RecordMetadata metadata, Exception exception) {
+    //没有异常，发送成功
+    if (exception == null) {
+    }else {
+      //记录异常等；
+    }
+  }
+});
+```
+
+
+
+#### 生产者的重要配置：
+
+**acks**：ack参数指定了必须要要有多少个分区副本收到消息，生产者才会认为消息是写入成功的。这个参数对**生产者端消息丢失**重要；
+
+- ack=0, 不会确认服务器是否收到消息（不知道消息丢失），进而能提升发送消息的吞吐量；
+- ack=1，只要集群的首领节点收到消息，生产者就会收到一个来自服务器的成功响应。
+    - 如果首领节点崩溃，新的首领还没有被选举出来，生产者会收到一个错误响应，生产者会重发数据；（**重发也是有限制的，见retries参数**）
+    - 如果一个没收到消息的节点成为新首领，消息还是会丢失。
+- ack=all
+
+**retries:** 决定生产者重发消息的次数。如果达到这个次数，生产者会放弃充实并返回错误。
+
 ### RocketMQ 
 
 [官网][https://rocketmq.apache.org/zh/docs/]

@@ -12,11 +12,11 @@
 
 > streaming text orientated message protocol；面向流文本的消息协议 ActiveMQ是它的典型实现；
 
-#### MQTT 7
+#### MQTT
 
 > message queuing telemetry transport；一种二进制协议，主要用于服务器和低功耗物联网设备间的通信。
 
-### MQ对比
+### Kafka
 
 #### Kafka基本概念
 
@@ -24,13 +24,15 @@
 - topic 主题：生产者将消息发送到指定topic，消费者订阅特定topic消费消息；
 - partition 分区：partition属于topic一部分，一个topic可以有多个partition。并且同一topic下的partition可以分布在不同的broker，也就是说一个topic可以横跨多个topic；Kafka通过分区来实现数据冗余和伸缩性。
 
-#### 生产者3个必要的配置
+#### 生产者消费者通用配置
 
 - bootstrap.servers：broker的地址，格式为 host:port 如果为集群，用`，`隔开；
 - key.serializer：key的序列化格式；
 - value.serializer：value的序列化格式；
 
-#### 同步/异步发送消息
+#### 生产者
+
+##### 同步/异步发送消息
 
 ```java
 //send方法提供异步和同步两种发送消息模式；
@@ -49,9 +51,7 @@ kafkaProducer.send(new ProducerRecord<>("topic","msg"), new Callback() {
 });
 ```
 
-
-
-#### 生产者的重要配置：
+##### 生产者的重要配置：
 
 **acks**：ack参数指定了必须要要有多少个分区副本收到消息，生产者才会认为消息是写入成功的。这个参数对**生产者端消息丢失**重要；
 
@@ -61,7 +61,52 @@ kafkaProducer.send(new ProducerRecord<>("topic","msg"), new Callback() {
     - 如果一个没收到消息的节点成为新首领，消息还是会丢失。
 - ack=all
 
-**retries:** 决定生产者重发消息的次数。如果达到这个次数，生产者会放弃充实并返回错误。
+**retries:** 决定生产者重发消息的次数。如果达到这个次数，生产者会放弃重试并返回错误。默认情况下，生产者会在每次重试之间等待100ms。 可以通过**retry.backoff.ms**参数设置这个时间间隔。建议在设置重试次数和间隔时间前先测试一下一个崩溃节点的恢复时间，选举出新领导节点的时间，以避免无效的重试；
+
+**batch.size:**缓冲区的数据大小，当达到这个内存大小时，批量发送，提高吞吐量，如果设置的太小，影响吞吐量；设置的太大，增加了消息的延迟；
+
+**linger.ms:** 和batch size有关，如果数据没有达到batch size的大小，但是等待了linger ms之后，也会发送数据。默认值为0，无延迟。
+
+#### 消费者
+
+> ​	kafka消费者从属于**消费者群组**，一个群组里的消费者订阅的是同一个主题，每个消费者接收主题一部分分区的消息。`往群组里增加消费者是横向拓展消费能力的主要方式。`消费者经常会做一些高延迟的操作，例如把把数据写入到数据库或HDFS，或者进行一些耗时的计算，在这些情况下，单个消费者往往无法根据数据的生产者速度，所以可以增加更多的消费者，分担负载，让每个消费者只处理部分分区的消息。所以有必要为主题创建大量的分区，在负载增长时可以加入更多的消费者。
+>
+> ​	一个新的消费者加入消费者群组时，它读取的是原本由其他消费者读取的消息。或当一个消费者在被关闭或无法服务时，它就离开群组，原本由它读取的数据由其他消费者消费。分区的所有权由一个消费者转移到另一个消费者，称为`rebalance`；
+>
+> ​	消费者通过向被指派为**coordinator群组协调器**的borker发送**心跳**保持活跃，说明该消费者还在读取分区里面的消息。消费者会在轮询消息（poll()）或提交偏移量时发送心跳。如果消费者停止发送心跳的时间足够长（具体见下文配置），coordinator认为它已经死亡，就会触发一次rebalance;
+
+##### 提交偏移量
+
+> ​	consumer将偏移量（分区消费的位置）保存在kafka一个内置topic中，为_consumer_offset；如果消费者下线(**消费者心跳超过session.timeout.ms或者消息处理超过max.poll.interval.ms**)或者有新的消费者加入消费者组，会触发rebalance;完成再均衡后，每个消费者可能会分配到新的分区（由分区分配策略决定）。为了能够继续消费消息，消费者需要读取每个分区后最后一次提交的偏移量，然后从偏移量指定的地方继续处理。**如果提交的偏移量小于客户端处理的最后一个消息的偏移量，那么处于两个偏移量之间的消息就会被重复处理。** **如果提交的偏移量大于客户端处理的最后一个消息的偏移量，那么处于两个偏移量之间的消息将会丢失。**
+
+**自动提交：**如果enable.auto.commit被设为true，那么每过5s，消费者会自动把从poll()方法接收到的最大offset提交上去。提交时间间隔由auto.commit.interval.ms控制。自动提交也是在轮询中进行的。消费者每次在进行轮询时会检查是否该提交offset，如果是，那么就会提交从上一次轮询返回的offset。假设5s的提交时间间隔，3s后发生了再均衡，也就是说offset落后了3s，这3s的消息就会被重复消费。消费者主动close之前也会提交offset。
+
+**同步提交**
+
+**异步提交**
+
+##### 消费者的重要配置
+
+**partition.assignment.strategy**： 消费者分区分配策略，默认策略是 Range+CooperativeSticky; 
+
+- Range： Range是对每个topic而言，通过partiotion数量/consumer数量 决定每个消费者应该消费几个分区。余数分区由排序在前面的消费者消费（多topic情况下前面的消费者负载增加，发生数据倾斜）；
+- RoundRobin
+- Sticky
+- CooperativeSticky
+
+**heartbeat.interval.ms：** 指定消费者向群组协调器发送心跳的频率。默认为3000ms；该值必须小于`session.timeout.ms`，一般是1/3。
+
+**session.timeout.ms：**消费者与群组协调器之间连接超时时间（也就是说指定了消费者可以多久不发送心跳。）默认为45000ms，超过该值，消费者会被移除，执行rebalance;把`session.timeout.ms`设置的比默认值小，可以更快的检测和恢复崩溃的节点，不过长时间的轮询可能导致非预期的rebalance。
+
+**max.poll.interval.ms:** 消费者处理消息的最大时长，默认是5分钟。超过该值，消费者被剔除，消费者组执行rebalance。
+
+**enable.auto.commit：**指定消费者是否自动提交偏移量，默认为true。
+
+**fetch.min.bytes：** 指定消费者从服务器获取记录的最小字节数。
+
+**fetch.max.wait.ms:** 指定broker的等待时间，默认500ms，如果没有足够的数据流入kafka，消费者获取记录的最小字节数就得不到满足，最终导致500ms。如果要降低延迟，则设置的小一些。如果fetch.min.bytes设置为100ms，并且fetch.max.wait.ms设置为1MB，kafka在收到消费者的请求后，要么返回1MB数据，要么在100ms返回所有待消费的数据。看哪个条件先满足。
+
+**max.poll.records:**控制poll()方法能够返回的最大记录数量。默认是500条。
 
 ### RocketMQ 
 

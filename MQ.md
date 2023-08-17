@@ -89,7 +89,7 @@ kafkaProducer.send(new ProducerRecord<>("topic","msg"), new Callback() {
 
 **partition.assignment.strategy**： 消费者分区分配策略，默认策略是 Range+CooperativeSticky; 
 
-- Range： Range是对每个topic而言，通过partiotion数量/consumer数量 决定每个消费者应该消费几个分区。余数分区由排序在前面的消费者消费（多topic情况下前面的消费者负载增加，发生数据倾斜）；
+- Range： Range是对每个topic而言，通过partition数量/consumer数量 决定每个消费者应该消费几个分区。余数分区由排序在前面的消费者消费（多topic情况下前面的消费者负载增加，发生数据倾斜）；
 - RoundRobin
 - Sticky
 - CooperativeSticky
@@ -109,6 +109,8 @@ kafkaProducer.send(new ProducerRecord<>("topic","msg"), new Callback() {
 **max.poll.records:**控制poll()方法能够返回的最大记录数量。默认是500条。
 
 ### RocketMQ 
+
+> RocketMQ中的`Name Server`相当于kafka中的zookeeper；
 
 [官网][https://rocketmq.apache.org/zh/docs/]
 
@@ -131,17 +133,18 @@ kafkaProducer.send(new ProducerRecord<>("topic","msg"), new Callback() {
 > 解决方法如下：
 
 1. 幂等，消费任意次消息所产生的影响与执行一次产生的效果一致。
-2. 使用消息的唯一标识，可以根据消息的唯一表示来判断是否已经消费过改消息，例如存放在redis中，不为空则代表消费过；
+2. 使用消息的唯一标识，可以根据消息的唯一表示来判断是否已经消费过改消息，例如存放在redis中，不为空则代表消费过，或存在数据库中，根据唯一表示查，如果有该消息，则对丢消息；
 
 #### 消息堆积
 
-> 消息堆积又分为 **Producer端生产过快**/ **Consumer消费过慢**；
+> 消息堆积通常是见消息的生产速率大于消息消费的速率；得具体分析，例如是消费者的消费能力不足，还是消费逻辑处理太耗时，或者是吞吐量不够（时间花在了拉取数据上）；
 
 Consumer端消息堆积：
 
 1. 增加消费者实例；
 2. 调整消费者组的消费速率，如增加消费线程数，并发度等；
 3. 优化消费端的处理逻辑；
+4. 增加消费者每次poll的消息量；
 
 
 

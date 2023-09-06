@@ -296,8 +296,18 @@ Nacos的配置列表面板，其中`Data Id`为**${prefix服务名}-${spring.pro
 >
 > 1. 声明式的服务调用:通过定义接口和使用注解，方便的描述服务之间的关系；
 > 2. 内置ribbon负载均衡；可以根据配置的负载均衡策略，自动选择请求转发方式；
+>
+> OpenFeign访问超时设置：
+>
+> openFeign默认的超时时间，默认分别是连接超时时间`10秒`、读超时时间`60秒`；注意超时也有可能是Ribbon引起的超时，该连接超时，读超超时默认为1秒；
+
+**Feign 和 openFiegn的区别：**
+
+- Fiegn是Spring Cloud组件中一个轻量级Restful的HTTP服务客户端，内置了Ribbon，用来做客户端负载均衡，调用注册中心的服务。Feign的使用方式是使用注解定义接口，调用该接口，就可以调用服务器注册中心的服务。
+- OpenFeign在Feign的基础上支持了SpringMVC的注解，例如@FiengClient可以解析@RequestMapping注解下的接口。并通过动态代理的方式产生实现类，实现类中做负载均衡并带调用其他服务。
 
 举例：在没有引入openFeign时，consumer对provider发起调用，使用restTemplate发起http请求：
+
 | ![image-20230616175042894](./assets/image-20230616175042894.png) |
 | ------------------------------------------------------------ |
 
@@ -305,6 +315,28 @@ Nacos的配置列表面板，其中`Data Id`为**${prefix服务名}-${spring.pro
 
 | <img src="./assets/image-20230616175234677.png" alt="image-20230616175234677" style="zoom:80%;" /> |
 | ------------------------------------------------------------ |
+
+**openFign接口传参：**
+
+- 请求体JSON传参 ：@RequestBody
+
+- url路径参数：@PathVariable
+
+- get表单请求参数：`@SpringQueryMap`
+
+    ```java
+    @FeignClient("demo")
+    public interface DemoTemplate {
+    
+        @GetMapping(path = "/demo")
+        String demoEndpoint(@SpringQueryMap Params params);
+    }
+    // Params.java
+    public class Params {
+        private String param1;
+        private String param2;
+    }
+    ```
 
 ##### Gateway
 

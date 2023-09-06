@@ -3,6 +3,7 @@
     - [什么是Spring框架？它的主要功能是什么？](#什么是spring框架它的主要功能是什么)
     - [Spring的核心模块是哪些？分别介绍它们的作用。](#spring的核心模块是哪些分别介绍它们的作用)
     - [什么是IoC（控制反转）和依赖注入（Dependency Injection）？它们有什么区别？](#什么是ioc控制反转和依赖注入dependency-injection它们有什么区别)
+    - [依赖注入的几种方式：](#依赖注入的几种方式)
     - [Spring的Bean是什么？如何定义Bean？Bean的生命周期](#spring的bean是什么如何定义beanbean的生命周期)
     - [Bean的作用域](#bean的作用域)
     - [Spring AOP是什么？它的作用和应用场景是什么？](#spring-aop是什么它的作用和应用场景是什么)
@@ -70,7 +71,7 @@
 >
 > 5. `销毁`：在应用程序关闭或者手动销毁Bean时，Spring容器会调用Bean的销毁方法。
 >
-> <img src="./SpringFramework自测.assets/07fd8589e54e6d3dbcb371f93448611f.png" alt="img" style="zoom: 67%;" />
+> <img src="./assets/07fd8589e54e6d3dbcb371f93448611f.png" alt="img" style="zoom: 67%;" />
 
 ##### Bean的作用域
 
@@ -181,7 +182,7 @@ public void transaction(){
 
 流程见上Spring MVC的主要组件，结合主要组件说。
 
-| ![img](./SpringFramework自测.assets/de6d2b213f112297298f3e223bf08f28.png) |
+| ![img](./assets/de6d2b213f112297298f3e223bf08f28.png) |
 | ------------------------------------------------------------ |
 
 ##### 什么是控制器（Controller）？如何定义和使用控制器？
@@ -263,12 +264,12 @@ public void transaction(){
 > - 配置管理：Nacos提供了统一的配置管理功能，可以动态管理和推送配置，配置热更新，支持多种数据格式，如properties，yml等。
 
 Nacos的服务注册面板，其中nacos的服务名为boot程序配置文件中spring.application.name；
-| ![image-20230616141255031](./SpringFramework自测.assets/image-20230616141255031.png) |
+| ![image-20230616141255031](./assets/image-20230616141255031.png) |
 | ------------------------------------------------------------ |
 
 Nacos的配置列表面板，其中`Data Id`为**${prefix服务名}-${spring.profiles.active环境}.${file-extension后缀}**。根据不同业务场景做好多环节配置隔离Namespace（例如dev，test，prod等），不同业务配置隔离Group。（详见注册表结构）
 
-| ![image-20230616142257177](./SpringFramework自测.assets/image-20230616142257177.png) |
+| ![image-20230616142257177](./assets/image-20230616142257177.png) |
 | ------------------------------------------------------------ |
 
 **Nacos的配置热更新流程**：
@@ -282,7 +283,7 @@ Nacos的配置列表面板，其中`Data Id`为**${prefix服务名}-${spring.pro
 
 **Nacos数据模型：**Namespace用来隔离环境，Group用来服务分组。一个Service包含多个实例，各个实例可能处于不用地址位置，因为service下有多个集群Cluster，集群下是不同的实例。
 
-<p><img src="./SpringFramework自测.assets/1561217857314-95ab332c-acfb-40b2-957a-aae26c2b5d71.jpeg" style="zoom: 40%;"><img src="./SpringFramework自测.assets/image-20210925215305446-1686902862990-5.png" alt="image-20210925215305446" style="zoom: 40%;" /></p>
+<p><img src="./assets/1561217857314-95ab332c-acfb-40b2-957a-aae26c2b5d71.jpeg" style="zoom: 40%;"><img src="./assets/image-20210925215305446-1686902862990-5.png" alt="image-20210925215305446" style="zoom: 40%;" /></p>
 
 ##### OpenFeign
 
@@ -297,12 +298,12 @@ Nacos的配置列表面板，其中`Data Id`为**${prefix服务名}-${spring.pro
 > 2. 内置ribbon负载均衡；可以根据配置的负载均衡策略，自动选择请求转发方式；
 
 举例：在没有引入openFeign时，consumer对provider发起调用，使用restTemplate发起http请求：
-| ![image-20230616175042894](./SpringFramework自测.assets/image-20230616175042894.png) |
+| ![image-20230616175042894](./assets/image-20230616175042894.png) |
 | ------------------------------------------------------------ |
 
 而引入了OpenFeign之后，只需要抽取好公共的接口，并引入包，就像调用本地方法一样简单。
 
-| <img src="./SpringFramework自测.assets/image-20230616175234677.png" alt="image-20230616175234677" style="zoom:80%;" /> |
+| <img src="./assets/image-20230616175234677.png" alt="image-20230616175234677" style="zoom:80%;" /> |
 | ------------------------------------------------------------ |
 
 ##### Gateway
@@ -382,13 +383,13 @@ Sentinel分为了两个部分：
 
 **DashBoard面板**：
 
-| 实时监控面板![image-20230619103428916](./SpringFramework自测.assets/image-20230619103428916.png) |
+| 实时监控面板![image-20230619103428916](./assets/image-20230619103428916.png) |
 | ------------------------------------------------------------ |
 
-|	簇点链路面板![image-20230619103635862](./SpringFramework自测.assets/image-20230619103635862.png)	|
+|	簇点链路面板![image-20230619103635862](./assets/image-20230619103635862.png)	|
 | ------------------------------------------------------------ |
 
-| 流控规则面板和熔断规则面板<br/><img src="./SpringFramework自测.assets/image-20230619104158065.png" alt="image-20230619104158065" style="zoom: 80%;" /><img src="./SpringFramework自测.assets/image-20230619112956025.png" alt="image-20230619112956025" style="zoom:80%;" /> |
+| 流控规则面板和熔断规则面板<br/><img src="./assets/image-20230619104158065.png" alt="image-20230619104158065" style="zoom: 80%;" /><img src="./assets/image-20230619112956025.png" alt="image-20230619112956025" style="zoom:80%;" /> |
 | ------------------------------------------------------------ |
 
 

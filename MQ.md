@@ -59,7 +59,7 @@ kafkaProducer.send(new ProducerRecord<>("topic","msg"), new Callback() {
 - ack=1，只要集群的首领节点收到消息，生产者就会收到一个来自服务器的成功响应。
     - 如果首领节点崩溃，新的首领还没有被选举出来，生产者会收到一个错误响应，生产者会重发数据；（**重发也是有限制的，见retries参数**）
     - 如果一个没收到消息的节点成为新首领，消息还是会丢失。
-- ack=all
+- ack=all，Leader和ISR队列里面的所有节点收齐数据后应答；
 
 **retries:** 决定生产者重发消息的次数。如果达到这个次数，生产者会放弃重试并返回错误。默认情况下，生产者会在每次重试之间等待100ms。 可以通过**retry.backoff.ms**参数设置这个时间间隔。建议在设置重试次数和间隔时间前先测试一下一个崩溃节点的恢复时间，选举出新领导节点的时间，以避免无效的重试；
 
@@ -155,7 +155,7 @@ Consumer端消息堆积：
 
 #### 事务消息机制
 
-> ![事务消息](./MQ.assets/transflow-0b07236d124ddb814aeaf5f6b5f3f72c.png)
+> ![事务消息](./assets/transflow-0b07236d124ddb814aeaf5f6b5f3f72c.png)
 >
 > 1. 生产者将消息发送至 rocketMQ 服务端;
 > 2. rocketMQ 服务端将消息持久化成功之后，向生产者返回`ACK`确认消息已经发送成功。此时消息被标记为**暂不能投递**，这种状态下的消息即为**半事务消息**;
@@ -179,7 +179,7 @@ Consumer端消息堆积：
 
 ​	PushConsumer 消费消息时，若消息处理逻辑出现预期之外的阻塞导致消息处理一直无法执行成功，SDK会按照消费超时处理强制提交消费失败结果，并按照消费重试逻辑进行处理。在PushConsumer类型中，消息的实时处理能力是基于SDK内部的典型`Reactor线程模型`实现的。如下图所示，SDK内置了`一个长轮询线程，先将消息异步拉取到SDK内置的缓存队列`中，再分别提交到消费线程中，触发监听器执行本地消费逻辑。如果消费者分组设置了顺序消费模式，则**PushConsumer在触发消费监听器时，严格遵循消息的先后顺序。业务处理逻辑无感知即可保证消息的消费顺序。**
 
-<img src="./MQ.assets/pushconsumer-26b909b090d4f911a40d5050d3ceba1d.png" alt="PushConsumer原理" style="zoom: 50%;" />
+<img src="./assets/pushconsumer-26b909b090d4f911a40d5050d3ceba1d.png" alt="PushConsumer原理" style="zoom: 50%;" />
 
 SimpleConsumer 是一种接口原子型的消费者类型，消息的获取、消费状态提交以及消费重试都是通过消费者业务逻辑主动发起调用完成。适用于以下场景：
 

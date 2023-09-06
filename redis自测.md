@@ -29,10 +29,14 @@
     - [Dict的扩容](#dict的扩容)
     - [Dict的收缩](#dict的收缩)
     - [Dict的rehash](#dict的rehash)
+  - [List 双端链表](#list-双端链表)
   - [ZipList 压缩列表](#ziplist-压缩列表)
     - [优点：](#优点)
     - [**缺点：**](#缺点)
     - [连锁更新问题：](#连锁更新问题)
+  - [SkipList 跳表](#skiplist-跳表)
+  - [QuickList](#quicklist)
+  - [链表总结：](#链表总结)
 
 ### redis内存篇
 
@@ -94,7 +98,7 @@ typedef struct redisDb {
 2. ==redis的读写是基于内存的==，内存的读写效率本身就很高且redis有高效的==数据结构==（例如跳表，哈希表等）；
 3. ==主线程通过IO多路复用来监听大量客户端的请求连接==，降低了资源消耗；
 
-| ![](./redis自测.assets/why-redis-so-fast-d3507ae8.png) |
+| ![](./assets/why-redis-so-fast-d3507ae8.png) |
 | :----------------------------------------------------: |
 
 > 这里介绍IO多路复用技术，它是一种网络编程模型技术；最基础的tcp的socket编程，它是阻塞I/O模型，基本上只能1对1通信，为了服务更多的客户端，比较传统的方式是使用多进程/线程模式，每来一个客户端连接，就分配一个进程/线程。但是当客户端增大到上万个时，切换、调度这些线程又成为了问题，于是就出现了I/O多路复用，可以只在一个进程里处理多个文件的I/O，Linux下提供三种I/O多路复用的API,分别是select、poll、epoll。
@@ -351,7 +355,7 @@ typedef struct dictEntry {
     struct dictEntry *next;
 } dictEntry;
 ```
-| ![](./redis自测.assets/image-20230611163538626.png) |
+| ![](./assets/image-20230611163538626.png) |
 | --------------------------------------------------- |
 
 ##### Dict的扩容

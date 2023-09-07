@@ -267,7 +267,7 @@ Nacos的服务注册面板，其中nacos的服务名为boot程序配置文件中
 | ![image-20230616141255031](./assets/image-20230616141255031.png) |
 | ------------------------------------------------------------ |
 
-Nacos的配置列表面板，其中`Data Id`为**${prefix服务名}-${spring.profiles.active环境}.${file-extension后缀}**。根据不同业务场景做好多环节配置隔离Namespace（例如dev，test，prod等），不同业务配置隔离Group。（详见注册表结构）
+Nacos的配置列表面板，其中`Data Id`为**\${prefix服务名}-\${spring.profiles.active环境}.${file-extension后缀}**。根据不同业务场景做好多环节配置隔离Namespace（例如dev，test，prod等），不同业务配置隔离Group。（详见注册表结构）
 
 | ![image-20230616142257177](./assets/image-20230616142257177.png) |
 | ------------------------------------------------------------ |
@@ -284,6 +284,13 @@ Nacos的配置列表面板，其中`Data Id`为**${prefix服务名}-${spring.pro
 **Nacos数据模型：**Namespace用来隔离环境，Group用来服务分组。一个Service包含多个实例，各个实例可能处于不用地址位置，因为service下有多个集群Cluster，集群下是不同的实例。
 
 <p><img src="./assets/1561217857314-95ab332c-acfb-40b2-957a-aae26c2b5d71.jpeg" style="zoom: 40%;"><img src="./assets/image-20210925215305446-1686902862990-5.png" alt="image-20210925215305446" style="zoom: 40%;" /></p>
+
+**Nacos中的ACP定理：**
+> `Zookeeper`：保证CP，放弃可用性；一旦zookeeper集群中master节点宕了，则会重新选举leader，这个过程可能非常漫长，在这过程中服务不可用。
+> 
+> `Eureka`：保证AP，放弃一致性；Eureka集群中的各个节点都是平等的，一旦某个节点宕了，其他节点正常服务（一旦客户端发现注册失败，则将会连接集群中其他节点），虽然保证了可用性，但是每个节点的数据可能不是最新的。
+> 
+> `Nacos`：同时支持CP和AP，默认是AP，可以切换；AP模式下以临时实例注册，CP模式下服务永久实例注册。
 
 ##### OpenFeign
 
@@ -337,7 +344,9 @@ Nacos的配置列表面板，其中`Data Id`为**${prefix服务名}-${spring.pro
         private String param2;
     }
     ```
-
+**openFeign的常见问题：**
+- 使用 HttpClient 替换默认的HttpURLConnection，默认的http请求没有连接池，性能和效率都很低。ribbon也是使用的HttpURLConnection，也可替换；
+- openFeign和ribbon的超时时间设置；openFeign默认是连接超时10s，读超时60s；Ribbon默认连接超时是1s;
 ##### Gateway
 
 网关功能：
@@ -405,8 +414,6 @@ Nacos的配置列表面板，其中`Data Id`为**${prefix服务名}-${spring.pro
 - 慢比例调用:根据请求的慢调用比例来触发熔断。当请求的响应时间超过设定的阈值，并且慢调用比例达到设定的阈值时，触发熔断；
 - 异常比例：根据请求的异常比例来触发熔断；
 - 异常数：根据请求的异常数来触发熔断；
-
-
 
 Sentinel分为了两个部分：
 

@@ -27,9 +27,9 @@
     - [Sentinel](#sentinel)
     - [Seata分布式事务](#seata分布式事务)
 
-### Spring Framework
+# Spring Framework
 
-#### Spring
+## Spring
 
 ##### 什么是Spring框架？它的主要功能是什么？
 
@@ -160,7 +160,7 @@ public void transaction(){
 - why: 本类方法调用不经过代理，因此无法增强
 - how: 依赖注入自己（成为代理）来调用
 
-#### Spring MVC
+## Spring MVC
 
 ##### 什么是Spring MVC框架？它的主要组件是什么？
 
@@ -197,7 +197,7 @@ public void transaction(){
 
 ##### 如何处理异常和错误情况？介绍Spring MVC的异常处理机制。
 
-#### SpringBoot
+## SpringBoot
 
 ##### 什么是SpringBoot？它与传统的Spring框架有何不同？
 
@@ -234,7 +234,7 @@ public void transaction(){
 
 > SpringBoot Starter是一种用于简化程序配置和依赖管理的方式，它实际包含了一组相关依赖和配置的模块。像在创建boot应用程序时，我们通常会将当前工程的父模块设置为`spring-boot-starter-parent`，而它的父模块又是`spring-boot-dependencies`，在这个starter中，包含了大量自适应版本的自动配置和依赖。
 
-#### SpringCloud ALIBABA
+## SpringCloud ALIBABA
 
 :point_down::point_down::point_down::point_down::point_down::sob:
 
@@ -252,7 +252,7 @@ public void transaction(){
 >
 > [OpenFeign](https://docs.spring.io/spring-cloud-openfeign/docs/current/reference/html/)
 
-##### Nacos
+### Nacos
 
 **nacos的核心功能**
 
@@ -292,7 +292,7 @@ Nacos的配置列表面板，其中`Data Id`为**\${prefix服务名}-\${spring.p
 > 
 > `Nacos`：同时支持CP和AP，默认是AP，可以切换；AP模式下以临时实例注册，CP模式下服务永久实例注册。
 
-##### OpenFeign
+### OpenFeign
 
 > OpenFeign是一个声明式的Web服务客户端，用于简化服务间的Http通信。它解决了如下问题：
 >
@@ -347,7 +347,8 @@ Nacos的配置列表面板，其中`Data Id`为**\${prefix服务名}-\${spring.p
 **openFeign的常见问题：**
 - 使用 HttpClient 替换默认的HttpURLConnection，默认的http请求没有连接池，性能和效率都很低。ribbon也是使用的HttpURLConnection，也可替换；
 - openFeign和ribbon的超时时间设置；openFeign默认是连接超时10s，读超时60s；Ribbon默认连接超时是1s;
-##### Gateway
+
+### Gateway
 
 网关功能：
 
@@ -364,7 +365,7 @@ Nacos的配置列表面板，其中`Data Id`为**\${prefix服务名}-\${spring.p
 
 | ![image-20230618005351848](.\assets\image-20230618005351848.png) |
 | ------------------------------------------------------------ |
-##### [Sentinel](https://sentinelguard.io/zh-cn/docs/introduction.html)
+### [Sentinel](https://sentinelguard.io/zh-cn/docs/introduction.html)
 
 > 在分布式系统中，各个服务之间依赖关系尤为复杂，如果某服务流量突增，导致服务延迟，响应过慢，随着请求的持续增加，系统可能最后会提供不了服务，如果该服务还和其他服务有依赖关系，那么该问题会慢慢扩散，出现请求堆积、资源占用，慢慢扩散到所有微服务，引起雪崩效应。
 >
@@ -380,11 +381,9 @@ Nacos的配置列表面板，其中`Data Id`为**\${prefix服务名}-\${spring.p
 
 > Sentinel是由阿里巴巴开元的轻量级的**流量控制和熔断降级框架**，用于保护分布式系统的`稳定性`和`可用性`。它提供了实时的监控、**流量控制**、**熔断降级**、系统保护等功能。
 
-**流量控制**
-
 **流量阈值**：
 
-- QPS
+- QPS（基于滑动窗口实现）
 
 - 线程数
 
@@ -392,13 +391,13 @@ Nacos的配置列表面板，其中`Data Id`为**\${prefix服务名}-\${spring.p
 
 - 直接：直接模式是Sentinel默认的流控模式，并根据预设的阈值限制流量的通过。可以设置每秒通过的请求数、并发线程等限制条件；
 
-- 关联：关联模式是基于关联的资源进行流控，即某个资源的流量收其他关联资源的影响。举例：A关联B，B达到阈值，限流A；
+- 关联：关联模式是基于关联的资源进行流控，即某个资源的流量收其他关联资源的影响。举例：当前流控规则A关联B，B达到阈值，限流A；
 
 - 链路：记录指定链路上的流量（指定资源从入口资源进来的流量，如果达到阈值，就可以限流。）
 
 **流控效果**：
 
-- 快速失败：直接决绝，当流量超出阈值时，Sentinel直接拒绝，返回Blocked by Sentinel (flow limiting)错误信息；
+- 快速失败：直接拒绝，当流量超出阈值时，Sentinel直接拒绝，返回Blocked by Sentinel (flow limiting)错误信息；
 
 - Warm up：预热/冷启动方式，让通过的流量缓慢增加，在一定时间内逐渐增加到阈值上限（只针对QPS）；（预热底层时通过`令牌桶`算法）算法中有一个**coldFactor冷却因子**，默认时3，即请求QPS从 threshold(阈值)/3开始，经预热时长逐渐升至设定的QPS阈值；
 
@@ -428,9 +427,31 @@ Sentinel分为了两个部分：
 |	簇点链路面板![image-20230619103635862](./assets/image-20230619103635862.png)	|
 | ------------------------------------------------------------ |
 
-| 流控规则面板和熔断规则面板<br/><img src="./assets/image-20230619104158065.png" alt="image-20230619104158065" style="zoom: 80%;" /><img src="./assets/image-20230619112956025.png" alt="image-20230619112956025" style="zoom:80%;" /> |
-| ------------------------------------------------------------ |
+| 流控规则面板和熔断规则面板
+
+| <img src="./assets/image-20230619104158065.png" alt="image-20230619104158065" style="zoom: 80%;" /><img src="./assets/image-20230619112956025.png" alt="image-20230619112956025" style="zoom:80%;" /> |
+| :----------------------------------------------------------- |
+
+#### **sentinel常见问题：**
+
+**限流算法**
+
+- 计数器算法
+    - 固定时间窗口
+    - 滑动时间窗口
+
+- 漏桶算法
+- 令牌桶算法
+
+**单机限流阈值如何计算？**
+
+周期性观察流量图得到真实的QPS峰值，假设该值就是理论水位，进而评估单机限流阈值；
+
+**网关限流后应用层是否还需要限流?**
+
+需要，微服务中，服务往往是错中复杂的，相互调用的，如果仅对网关进行限流，没有对整体服务的一个上下游进行综合分析，可能会限制某些服务的响应以及拖垮某些服务；
+<img src="assets/image-20230909155147784.png" alt="image-20230909155147784" style="zoom:50%;" />
 
 
 
-##### Seata分布式事务
+### Seata分布式事务

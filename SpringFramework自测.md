@@ -1,30 +1,31 @@
 - [Spring Framework](#spring-framework)
   - [Spring](#spring)
-    - [什么是Spring框架？它的主要功能是什么？](#什么是spring框架它的主要功能是什么)
-    - [Spring的核心模块是哪些？分别介绍它们的作用。](#spring的核心模块是哪些分别介绍它们的作用)
-    - [什么是IoC（控制反转）和依赖注入（Dependency Injection）？它们有什么区别？](#什么是ioc控制反转和依赖注入dependency-injection它们有什么区别)
-    - [依赖注入的几种方式：](#依赖注入的几种方式)
-    - [Spring的Bean是什么？如何定义Bean？Bean的生命周期](#spring的bean是什么如何定义beanbean的生命周期)
-    - [Bean的作用域](#bean的作用域)
-    - [Spring AOP是什么？它的作用和应用场景是什么？](#spring-aop是什么它的作用和应用场景是什么)
-    - [Spring事务管理是如何实现的？介绍Spring事务的传播行为和隔离级别。](#spring事务管理是如何实现的介绍spring事务的传播行为和隔离级别)
+        - [什么是Spring框架？它的主要功能是什么？](#什么是spring框架它的主要功能是什么)
+        - [Spring的核心模块是哪些？分别介绍它们的作用。](#spring的核心模块是哪些分别介绍它们的作用)
+        - [什么是IoC（控制反转）和依赖注入（Dependency Injection）？它们有什么区别？](#什么是ioc控制反转和依赖注入dependency-injection它们有什么区别)
+        - [依赖注入的几种方式：](#依赖注入的几种方式)
+        - [Spring的Bean是什么？如何定义Bean？Bean的生命周期](#spring的bean是什么如何定义beanbean的生命周期)
+        - [Bean的作用域](#bean的作用域)
+        - [Spring AOP是什么？它的作用和应用场景是什么？](#spring-aop是什么它的作用和应用场景是什么)
+        - [Spring事务管理是如何实现的？介绍Spring事务的传播行为和隔离级别。](#spring事务管理是如何实现的介绍spring事务的传播行为和隔离级别)
   - [Spring MVC](#spring-mvc)
-    - [什么是Spring MVC框架？它的主要组件是什么？](#什么是spring-mvc框架它的主要组件是什么)
-    - [Spring MVC的请求处理流程是怎样的？](#spring-mvc的请求处理流程是怎样的)
-    - [什么是控制器（Controller）？如何定义和使用控制器？](#什么是控制器controller如何定义和使用控制器)
-    - [如何处理异常和错误情况？介绍Spring MVC的异常处理机制。](#如何处理异常和错误情况介绍spring-mvc的异常处理机制)
+        - [什么是Spring MVC框架？它的主要组件是什么？](#什么是spring-mvc框架它的主要组件是什么)
+        - [Spring MVC的请求处理流程是怎样的？](#spring-mvc的请求处理流程是怎样的)
+        - [什么是控制器（Controller）？如何定义和使用控制器？](#什么是控制器controller如何定义和使用控制器)
+        - [如何处理异常和错误情况？介绍Spring MVC的异常处理机制。](#如何处理异常和错误情况介绍spring-mvc的异常处理机制)
   - [SpringBoot](#springboot)
-    - [什么是SpringBoot？它与传统的Spring框架有何不同？](#什么是springboot它与传统的spring框架有何不同)
-    - [Spring Boot的核心特点是什么？为什么使用SpringBoot？](#spring-boot的核心特点是什么为什么使用springboot)
-    - [如何创建一个SpringBoot应用程序？需要哪些配置和依赖？](#如何创建一个springboot应用程序需要哪些配置和依赖)
-    - [介绍@SpringBootApplication注解](#介绍springbootapplication注解)
-    - [SpringBoot的自动配置是如何工作的？如何自定义和禁用自动配置？](#springboot的自动配置是如何工作的如何自定义和禁用自动配置)
-    - [什么是SpringBoot Starter？如何使用和创建自定义的Starter？](#什么是springboot-starter如何使用和创建自定义的starter)
+        - [什么是SpringBoot？它与传统的Spring框架有何不同？](#什么是springboot它与传统的spring框架有何不同)
+        - [Spring Boot的核心特点是什么？为什么使用SpringBoot？](#spring-boot的核心特点是什么为什么使用springboot)
+        - [如何创建一个SpringBoot应用程序？需要哪些配置和依赖？](#如何创建一个springboot应用程序需要哪些配置和依赖)
+        - [介绍@SpringBootApplication注解](#介绍springbootapplication注解)
+        - [SpringBoot的自动配置是如何工作的？如何自定义和禁用自动配置？](#springboot的自动配置是如何工作的如何自定义和禁用自动配置)
+        - [什么是SpringBoot Starter？如何使用和创建自定义的Starter？](#什么是springboot-starter如何使用和创建自定义的starter)
   - [SpringCloud ALIBABA](#springcloud-alibaba)
     - [Nacos](#nacos)
     - [OpenFeign](#openfeign)
     - [Gateway](#gateway)
     - [Sentinel](#sentinel)
+      - [**sentinel常见问题：**](#sentinel常见问题)
     - [Seata分布式事务](#seata分布式事务)
 
 # Spring Framework
@@ -361,7 +362,7 @@ Nacos的配置列表面板，其中`Data Id`为**\${prefix服务名}-\${spring.p
 | <img src=".\assets\image-20230618005901080.png" alt="image-20230618005901080" style="zoom: 80%;" /> |
 | ------------------------------------------------------------ |
 
-| `服务路由、负载均衡`举例:（访问网关url地址时，以/user/开头的请求，都转发给user-service，user-service也是注册在nacos的一个服务） |
+ `服务路由、负载均衡`举例:（访问网关url地址时，以/user/开头的请求，都转发给user-service，user-service也是注册在nacos的一个服务）
 
 | ![image-20230618005351848](.\assets\image-20230618005351848.png) |
 | ------------------------------------------------------------ |
@@ -374,26 +375,26 @@ Nacos的配置列表面板，其中`Data Id`为**\${prefix服务名}-\${spring.p
 有下面常见的容错方式保证系统的可用性和稳定性：
 
 1. 主动超时：主动给http请求设置一个超时时间，超时就直接返回。不会造成服务堆积；
-2. 限流：限制最大并发数；
-3. 熔断
+2. **限流**：限制最大并发数，QPS等；
+3. **熔断**
 4. 隔离：把每个依赖或调用的服务都隔离开，防止级联失败引起的整体服务不可用；
 5. 降级
 
-> Sentinel是由阿里巴巴开元的轻量级的**流量控制和熔断降级框架**，用于保护分布式系统的`稳定性`和`可用性`。它提供了实时的监控、**流量控制**、**熔断降级**、系统保护等功能。
+> Sentinel是由阿里巴巴开源的轻量级的**流量控制**和**熔断降级**框架，用于保护分布式系统的`稳定性`和`可用性`。它提供了实时的监控、**流量控制**、**熔断降级**、系统保护等功能。
 
-**流量阈值**：
+**流量控制阈值:**
 
 - QPS（基于滑动窗口实现）
 
-- 线程数
+- 并发线程数
 
-**流控模式**：
+**流控模式**：基于调用关系的流量控制
 
-- 直接：直接模式是Sentinel默认的流控模式，并根据预设的阈值限制流量的通过。可以设置每秒通过的请求数、并发线程等限制条件；
+- 直接：统计当前资源的请求，触发阈值时对当前资源直接限流。
 
-- 关联：关联模式是基于关联的资源进行流控，即某个资源的流量收其他关联资源的影响。举例：当前流控规则A关联B，B达到阈值，限流A；
+- 关联：关联模式是基于关联的资源（输入关联资源）进行流控，即某个资源的流量受其他关联资源的影响。举例：当前流控规则A关联B，B达到阈值，限流A；
 
-- 链路：记录指定链路上的流量（指定资源从入口资源进来的流量，如果达到阈值，就可以限流。）
+- 链路：记录指定链路上的流量（指定资源从入口资源进来的流量，如果达到阈值，就可以限流该指定链路。）
 
 **流控效果**：
 
@@ -426,6 +427,12 @@ Sentinel分为了两个部分：
 
 |	簇点链路面板![image-20230619103635862](./assets/image-20230619103635862.png)	|
 | ------------------------------------------------------------ |
+
+**流控规则面板和熔断规则面板**
+
+| <img src="./assets/image-20230619104158065.png" alt="image-20230619104158065" style="zoom: 80%;" /><img src="./assets/image-20230619112956025.png" alt="image-20230619112956025" style="zoom:80%;" /> |
+| ------------------------------------------------------------ |
+
 
 | 流控规则面板和熔断规则面板
 

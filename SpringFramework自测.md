@@ -28,9 +28,9 @@
       - [**sentinel常见问题：**](#sentinel常见问题)
     - [分布式事务](#分布式事务)
         - [**2PC**](#2pc)
+        - [TCC](#tcc)
         - [**XA方案**](#xa方案)
-        - [**Seata-AT**(Automatic Transaction)](#seata-atautomatic-transaction)
-        - [Seatac-TCC 模式](#seatac-tcc-模式)
+        - [**Seata-AT**(Automatic Transaction) 二阶段提交](#seata-atautomatic-transaction-二阶段提交)
 
 
 # Spring Framework
@@ -370,7 +370,7 @@ Nacos的配置列表面板，其中`Data Id`为**\${prefix服务名}-\${spring.p
 
  `服务路由、负载均衡`举例:（访问网关url地址时，以/user/开头的请求，都转发给user-service，user-service也是注册在nacos的一个服务）
 
-| ![image-20230618005351848](./assets/image-20230618005351848.png) |
+| ![image-20230618005351848](.\assets\image-20230618005351848.png) |
 | ------------------------------------------------------------ |
 ### [Sentinel](https://sentinelguard.io/zh-cn/docs/introduction.html)
 
@@ -554,5 +554,3 @@ Seata提供了AT、TC、SAGA、XA等事务模式；其中AT是二阶段提交协
 
 1. 收到 TC 的分支提交请求，把请求放入一个异步任务的队列中，马上返回提交成功的结果给 TC。
 2. 异步任务阶段的分支提交请求将异步和批量地删除相应 UNDO LOG 记录。
-
-Seata事务隔离相关阅读 ：https://seata.io/zh-cn/docs/user/appendix/isolation

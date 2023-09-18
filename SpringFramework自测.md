@@ -370,7 +370,7 @@ Nacos的配置列表面板，其中`Data Id`为**\${prefix服务名}-\${spring.p
 
  `服务路由、负载均衡`举例:（访问网关url地址时，以/user/开头的请求，都转发给user-service，user-service也是注册在nacos的一个服务）
 
-| ![image-20230618005351848](.\assets\image-20230618005351848.png) |
+| ![image-20230618005351848](./assets/image-20230618005351848.png) |
 | ------------------------------------------------------------ |
 ### [Sentinel](https://sentinelguard.io/zh-cn/docs/introduction.html)
 
